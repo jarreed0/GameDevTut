@@ -10,6 +10,7 @@ Game::Game() {
   star.setDest(100, 100, 100, 120);
   star.setSource(0, 0, 75, 50);
   star.setImage("image.png", ren);
+  font = TTF_OpenFont("Sans.ttf", 24);
   loop();
 }
 
@@ -28,14 +29,13 @@ void Game::loop() {
     if(lastFrame >= (lastTime+1000)) {
       lastTime=lastFrame;
       frameCount=0;
-      count++;
     }
 
+    cout << mousex << ", " << mousey << endl;
+     
     render();
     input();
     update();
-
-    if(count>3) running=false;
   }
 }
 
@@ -48,7 +48,7 @@ void Game::render() {
   SDL_RenderFillRect(ren, &rect);
 
   draw(star);
-  draw("this is our first message!", 20, 30, 0, 255, 0, 24);
+  draw("this is our first message!", 20, 30, 0, 255, 0);
 
   frameCount++;
   int timerFPS = SDL_GetTicks()-lastFrame;
@@ -66,10 +66,9 @@ void Game::draw(Object o) {
  SDL_RenderCopyEx(ren, o.getTex(), &src, &dest, 0, NULL, SDL_FLIP_NONE);
 }
 
-void Game::draw(const char* msg, int x, int y, int r, int g, int b, int size) {
+void Game::draw(const char* msg, int x, int y, int r, int g, int b) {
  SDL_Surface* surf;
  SDL_Texture* tex;
- TTF_Font *font = TTF_OpenFont("Sans.ttf", size);
  SDL_Color color;
  color.r=r;
  color.g=g;
@@ -85,4 +84,19 @@ void Game::draw(const char* msg, int x, int y, int r, int g, int b, int size) {
  SDL_FreeSurface(surf);
  SDL_RenderCopy(ren, tex, NULL, &rect);
  SDL_DestroyTexture(tex);
+}
+
+void Game::input() {
+  SDL_Event e;
+  while(SDL_PollEvent(&e)) {
+    if(e.type == SDL_QUIT) {running=false; cout << "Quitting" << endl;}
+    if(e.type == SDL_KEYDOWN) {
+      if(e.key.keysym.sym == SDLK_ESCAPE) running=false;
+      if(e.key.keysym.sym == SDLK_w) {cout << "w down" << endl;}
+    }
+    if(e.type == SDL_KEYUP) {
+      if(e.key.keysym.sym == SDLK_w) {cout << "w up" << endl;}      
+    }
+     SDL_GetMouseState(&mousex, &mousey);
+  }
 }

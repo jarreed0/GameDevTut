@@ -16,17 +16,19 @@ public:
   ~Game();
   void loop();
   void update() {}
-  void input() {}
+  void input();
   void render();
   void draw(Object o);
-  void draw(const char* msg, int x, int y, int r, int g, int b, int size);
+  void draw(const char* msg, int x, int y, int r, int g, int b);
 private:
   SDL_Renderer* ren;
   SDL_Window* win;
+  TTF_Font *font;
   bool running;
   int count;
   int frameCount, timerFPS, lastFrame;
   Object star;
+  int mousex, mousey;
 };
 
 #endif //GAME_H
