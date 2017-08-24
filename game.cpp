@@ -1,7 +1,7 @@
 #include "game.h"
 
 Game::Game() {
-  SDL_Init(0);
+  SDL_Init(SDL_INIT_EVERYTHING);
   SDL_CreateWindowAndRenderer(360, 240, 0, &win, &ren);
   SDL_SetWindowTitle(win, "Our First Game!!!");
   TTF_Init();
@@ -11,6 +11,7 @@ Game::Game() {
   star.setSource(0, 0, 75, 50);
   star.setImage("image.png", ren);
   font = TTF_OpenFont("Sans.ttf", 24);
+  effect.load("/home/avery/workspace/jarreed0-the-exanimated-source-code-2-f83692a5772a/src/net/Archeantus/Zombinator/resources/sounds/random.wav");
   loop();
 }
 
@@ -30,8 +31,6 @@ void Game::loop() {
       lastTime=lastFrame;
       frameCount=0;
     }
-
-    cout << mousex << ", " << mousey << endl;
      
     render();
     input();
@@ -92,7 +91,7 @@ void Game::input() {
     if(e.type == SDL_QUIT) {running=false; cout << "Quitting" << endl;}
     if(e.type == SDL_KEYDOWN) {
       if(e.key.keysym.sym == SDLK_ESCAPE) running=false;
-      if(e.key.keysym.sym == SDLK_w) {cout << "w down" << endl;}
+      if(e.key.keysym.sym == SDLK_w) {cout << "w down" << endl; effect.play();}
     }
     if(e.type == SDL_KEYUP) {
       if(e.key.keysym.sym == SDLK_w) {cout << "w up" << endl;}      

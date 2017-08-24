@@ -7,7 +7,7 @@ using namespace std;
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 
-
+#include "audio.h"
 #include "object.h"
 
 class Game {
@@ -29,6 +29,7 @@ private:
   int frameCount, timerFPS, lastFrame;
   Object star;
   int mousex, mousey;
+  Audio effect;
 };
 
 #endif //GAME_H
