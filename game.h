@@ -9,13 +9,14 @@ using namespace std;
 
 #include "audio.h"
 #include "object.h"
+#include "entity.h"
 
 class Game {
 public:
   Game();
   ~Game();
   void loop();
-  void update() {}
+  void update();
   void input();
   void render();
   void draw(Object o);
@@ -29,7 +30,8 @@ private:
   int frameCount, timerFPS, lastFrame;
   Object star;
   int mousex, mousey;
-  Audio effect;
+  Entity player;
+  int idol, shield;
 };
 
 #endif //GAME_H

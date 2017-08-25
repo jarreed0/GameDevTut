@@ -11,7 +11,11 @@ Game::Game() {
   star.setSource(0, 0, 75, 50);
   star.setImage("image.png", ren);
   font = TTF_OpenFont("Sans.ttf", 24);
-  effect.load("/home/avery/workspace/jarreed0-the-exanimated-source-code-2-f83692a5772a/src/net/Archeantus/Zombinator/resources/sounds/random.wav");
+  player.setImage("res/player.png", ren);
+  player.setDest(100, 100, 47*3, 45*3);
+  idol = player.createCycle(1, 47, 45, 2, 20);
+  shield = player.createCycle(2, 47, 45, 4, 10);  
+  player.setCurAnimation(idol);
   loop();
 }
 
@@ -48,6 +52,7 @@ void Game::render() {
 
   draw(star);
   draw("this is our first message!", 20, 30, 0, 255, 0);
+  draw(player);
 
   frameCount++;
   int timerFPS = SDL_GetTicks()-lastFrame;
@@ -91,11 +96,15 @@ void Game::input() {
     if(e.type == SDL_QUIT) {running=false; cout << "Quitting" << endl;}
     if(e.type == SDL_KEYDOWN) {
       if(e.key.keysym.sym == SDLK_ESCAPE) running=false;
-      if(e.key.keysym.sym == SDLK_w) {cout << "w down" << endl; effect.play();}
+      if(e.key.keysym.sym == SDLK_w) {cout << "w down" << endl; player.setCurAnimation(shield);}
     }
     if(e.type == SDL_KEYUP) {
-      if(e.key.keysym.sym == SDLK_w) {cout << "w up" << endl;}      
+      if(e.key.keysym.sym == SDLK_w) {cout << "w up" << endl; player.reverse(1, idol);}      
     }
      SDL_GetMouseState(&mousex, &mousey);
   }
+}
+
+void Game::update() {
+  player.updateAnimation();
 }
