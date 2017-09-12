@@ -2,24 +2,18 @@
 
 Game::Game() {
   SDL_Init(SDL_INIT_EVERYTHING);
-  SDL_CreateWindowAndRenderer(360, 240, 0, &win, &ren);
+  SDL_CreateWindowAndRenderer(WIDTH, HEIGHT, 0, &win, &ren);
   SDL_SetWindowTitle(win, "Our First Game!!!");
+  loadMap("res/1.level");  
   TTF_Init();
   running=true;
   count=0;
-  star.setDest(100, 100, 100, 120);
-  star.setSource(0, 0, 75, 50);
-  star.setImage("image.png", ren);
-  font = TTF_OpenFont("Sans.ttf", 24);
-  player.setImage("res/player.png", ren);
-  player.setDest(100, 100, 47*3, 45*3);
-  idol = player.createCycle(1, 47, 45, 2, 20);
-  shield = player.createCycle(2, 47, 45, 4, 10);  
-  player.setCurAnimation(idol);
+  font = TTF_OpenFont("res/font.ttf", 24);
   loop();
 }
 
 Game::~Game() {
+  TTF_CloseFont(font);
   TTF_Quit();
   SDL_DestroyRenderer(ren);
   SDL_DestroyWindow(win);
@@ -43,16 +37,15 @@ void Game::loop() {
 }
 
 void Game::render() {
-  SDL_SetRenderDrawColor(ren, 255, 0, 0, 255);
+  SDL_SetRenderDrawColor(ren, 126, 192, 238, 255);
   SDL_Rect rect;
   rect.x=rect.y=0;
-  rect.w=360;
-  rect.h=240;
+  rect.w=WIDTH;
+  rect.h=HEIGHT;
   SDL_RenderFillRect(ren, &rect);
 
-  draw(star);
-  draw("this is our first message!", 20, 30, 0, 255, 0);
-  draw(player);
+  //draw(player);
+  drawMap();
 
   frameCount++;
   int timerFPS = SDL_GetTicks()-lastFrame;
@@ -96,15 +89,50 @@ void Game::input() {
     if(e.type == SDL_QUIT) {running=false; cout << "Quitting" << endl;}
     if(e.type == SDL_KEYDOWN) {
       if(e.key.keysym.sym == SDLK_ESCAPE) running=false;
-      if(e.key.keysym.sym == SDLK_w) {cout << "w down" << endl; player.setCurAnimation(shield);}
     }
     if(e.type == SDL_KEYUP) {
-      if(e.key.keysym.sym == SDLK_w) {cout << "w up" << endl; player.reverse(1, idol);}      
     }
      SDL_GetMouseState(&mousex, &mousey);
   }
 }
 
 void Game::update() {
-  player.updateAnimation();
+  //player.updateAnimation();
+}
+
+void Game::loadMap(const char* filename) {
+  int current, mx, my, mw, mh;
+  ifstream in(filename);
+  if(!in.is_open()) {
+    cout << "Failed to open map file." << endl;
+    return;
+  }
+  in >> mw;
+  in >> mh;
+  in >> mx;
+  in >> my;
+  for(int i=0; i<mh; i++) {
+    for(int j=0; j<mw; j++) {
+      if(in.eof()) {
+        cout << "Reached end of map file too soon." << endl;
+        return;
+      }
+      in >> current;
+      if(current != 0) {
+        Object tmp;
+        tmp.setImage("res/tileset.png", ren);
+        tmp.setSource((current-1)*32, 0, 32, 32);
+        tmp.setDest((j*TILE_SIZE)+mx, (i*TILE_SIZE)+my, TILE_SIZE, TILE_SIZE);
+        if(current==2 || current==4) tmp.setSolid(0);
+        map.push_back(tmp);
+      }
+    }
+  }
+  in.close();
+}
+
+void Game::drawMap() {
+  for(int i=0; i<map.size(); i++) {
+    draw(map[i]);
+  }
 }
