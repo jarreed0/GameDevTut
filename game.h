@@ -13,8 +13,8 @@ using namespace std;
 #include "object.h"
 #include "entity.h"
 
-#define WIDTH 750
-#define HEIGHT 500
+#define WIDTH 1280
+#define HEIGHT 720
 #define TILE_SIZE 16
 
 class Game {
@@ -29,6 +29,7 @@ public:
   void draw(const char* msg, int x, int y, int r, int g, int b);
   void loadMap(const char* filename);
   void drawMap();
+  void scroll();
 private:
   SDL_Renderer* ren;
   SDL_Window* win;
@@ -39,6 +40,8 @@ private:
   int mousex, mousey;
   Entity player;
   vector<Object> map;
+  int mapX, mapY;
+  int speed;
 };
 
 #endif //GAME_H

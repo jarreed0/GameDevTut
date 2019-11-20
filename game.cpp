@@ -1,14 +1,16 @@
 #include "game.h"
 
 Game::Game() {
-  SDL_Init(SDL_INIT_EVERYTHING);
-  SDL_CreateWindowAndRenderer(WIDTH, HEIGHT, 0, &win, &ren);
+  if(SDL_Init(SDL_INIT_EVERYTHING) < 0) cout << "Failed at SDL_Init()" << SDL_GetError() << endl;
+  if(SDL_CreateWindowAndRenderer(WIDTH, HEIGHT, 0, &win, &ren) < 0) cout << "Failed at SDL_CreateWindowAndRenderer()" << SDL_GetError() << endl;
   SDL_SetWindowTitle(win, "Our First Game!!!");
   loadMap("res/1.level");  
   TTF_Init();
   running=true;
   count=0;
   font = TTF_OpenFont("res/font.ttf", 24);
+  mapX=mapY=0;
+  speed=1;
   loop();
 }
 
@@ -21,10 +23,10 @@ Game::~Game() {
 }
 
 void Game::loop() {
+  static int lastTime;
   while(running) {
 
     lastFrame=SDL_GetTicks();
-    static int lastTime;
     if(lastFrame >= (lastTime+1000)) {
       lastTime=lastFrame;
       frameCount=0;
@@ -98,6 +100,7 @@ void Game::input() {
 
 void Game::update() {
   //player.updateAnimation();
+  scroll();
 }
 
 void Game::loadMap(const char* filename) {
@@ -131,8 +134,19 @@ void Game::loadMap(const char* filename) {
   in.close();
 }
 
+void Game::scroll() {
+  for(int i=0; i<map.size(); i++) {
+    map[i].setDest(map[i].getDX()+speed, map[i].getDY()+speed);
+  }
+}
+
 void Game::drawMap() {
   for(int i=0; i<map.size(); i++) {
-    draw(map[i]);
+    if(map[i].getDX() >= mapX-TILE_SIZE
+    & map[i].getDY() >= mapY-TILE_SIZE
+    & map[i].getDX() <= mapX+WIDTH+TILE_SIZE
+    & map[i].getDY() <= mapY+HEIGHT+TILE_SIZE) {
+      draw(map[i]);
+    }
   }
 }

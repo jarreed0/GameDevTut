@@ -5,6 +5,7 @@
 
 class Audio {
 public:
+    Audio();
     ~Audio();
     void load(const char* filename);
     void play();
