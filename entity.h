@@ -13,6 +13,7 @@ public:
     int getMaxHealth() const {return maxHealth;}
     int createCycle(int r, int w, int h, int amount, int speed);
     void setCurAnimation(int c) {begin=0;curAnim = c;}
+    int getCurAnimation() const {return curAnim;}
     void updateAnimation();
     void reverse(bool r) {rev=r;}
     void reverse(bool r, int nA) {rev=r; nAb=1; nA=newAnim;}

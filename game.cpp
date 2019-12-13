@@ -10,7 +10,15 @@ Game::Game() {
   count=0;
   font = TTF_OpenFont("res/font.ttf", 24);
   mapX=mapY=0;
-  speed=1;
+  speed=4;
+  player.setDest(WIDTH/2, HEIGHT/2, 24, 32);
+  player.setImage("res/player.png", ren);
+  player.setSource(0, 0, 24, 32);
+  idoll = player.createCycle(2, 24, 32, 2, 20);
+  idolr = player.createCycle(1, 24, 32, 2, 20);
+  runl = player.createCycle(4, 24, 32, 4, 4);
+  runr = player.createCycle(3, 24, 32, 4, 4);
+  player.setCurAnimation(idolr);
   loop();
 }
 
@@ -19,11 +27,13 @@ Game::~Game() {
   TTF_Quit();
   SDL_DestroyRenderer(ren);
   SDL_DestroyWindow(win);
+  IMG_Quit();
+  TTF_Quit();
   SDL_Quit();
 }
 
 void Game::loop() {
-  static int lastTime;
+  static int lastTime = 0;
   while(running) {
 
     lastFrame=SDL_GetTicks();
@@ -46,8 +56,8 @@ void Game::render() {
   rect.h=HEIGHT;
   SDL_RenderFillRect(ren, &rect);
 
-  //draw(player);
   drawMap();
+  draw(player);
 
   frameCount++;
   int timerFPS = SDL_GetTicks()-lastFrame;
@@ -91,19 +101,47 @@ void Game::input() {
     if(e.type == SDL_QUIT) {running=false; cout << "Quitting" << endl;}
     if(e.type == SDL_KEYDOWN) {
       if(e.key.keysym.sym == SDLK_ESCAPE) running=false;
+      if(e.key.keysym.sym == SDLK_a) {l=1;r=0;}
+      if(e.key.keysym.sym == SDLK_d) {r=1;l=0;}
+      if(e.key.keysym.sym == SDLK_w) u=1;
+      if(e.key.keysym.sym == SDLK_s) d=1;
     }
     if(e.type == SDL_KEYUP) {
+      if(e.key.keysym.sym == SDLK_a) {l=0;player.setCurAnimation(idoll);}
+      if(e.key.keysym.sym == SDLK_d) {r=0;player.setCurAnimation(idolr);}
+      if(e.key.keysym.sym == SDLK_w) u=0;
+      if(e.key.keysym.sym == SDLK_s) d=0;
     }
      SDL_GetMouseState(&mousex, &mousey);
   }
 }
 
 void Game::update() {
-  //player.updateAnimation();
-  scroll();
+  if(l) {if(player.getCurAnimation()!=runl) {player.setCurAnimation(runl);} player.setDest(player.getDX()-speed, player.getDY());}
+  if(r) {if(player.getCurAnimation()!=runr) {player.setCurAnimation(runr);} player.setDest(player.getDX()+speed, player.getDY());}
+  player.updateAnimation();
+  fall=1;
+  for(int i=0; i<map.size(); i++) {
+    if(collision(player, map[i])) {
+      if(map[i].getSolid()) fall=0;
+       if(map[i].getId() == 35) {
+        if(u) {player.setDest(player.getDX(), player.getDY()-(10*TILE_SIZE));u=d=0;}
+        if(d) {player.setDest(player.getDX(), player.getDY()+(10*TILE_SIZE));u=d=0;}
+      }
+    }
+  }
+
+  if(fall) player.setDest(player.getDX(), player.getDY()+GRAV);
+
+  if(player.getDX() < 100) {player.setDest(100, player.getDY()); scroll(speed, 0);}
+  if(player.getDX() > WIDTH-100) {player.setDest(WIDTH-100, player.getDY()); scroll(-speed, 0);}
+  if(player.getDY() < 100) {player.setDest(player.getDX(), 100); scroll(0, speed);}
+  if(player.getDY() > HEIGHT-100) {player.setDest(player.getDX(), HEIGHT-100); scroll(0, -speed);}
 }
 
 void Game::loadMap(const char* filename) {
+  Object tmp;
+  tmp.setImage("res/tileset.png", ren);
   int current, mx, my, mw, mh;
   ifstream in(filename);
   if(!in.is_open()) {
@@ -122,11 +160,11 @@ void Game::loadMap(const char* filename) {
       }
       in >> current;
       if(current != 0) {
-        Object tmp;
-        tmp.setImage("res/tileset.png", ren);
+        tmp.setSolid(1);
         tmp.setSource((current-1)*32, 0, 32, 32);
         tmp.setDest((j*TILE_SIZE)+mx, (i*TILE_SIZE)+my, TILE_SIZE, TILE_SIZE);
-        if(current==2 || current==4) tmp.setSolid(0);
+        tmp.setId(current);
+        if(current==12 || current==30 || current==35 || current==22) tmp.setSolid(0);
         map.push_back(tmp);
       }
     }
@@ -134,9 +172,9 @@ void Game::loadMap(const char* filename) {
   in.close();
 }
 
-void Game::scroll() {
+void Game::scroll(int x, int y) {
   for(int i=0; i<map.size(); i++) {
-    map[i].setDest(map[i].getDX()+speed, map[i].getDY()+speed);
+    map[i].setDest(map[i].getDX()+x, map[i].getDY()+y);
   }
 }
 
@@ -148,5 +186,14 @@ void Game::drawMap() {
     & map[i].getDY() <= mapY+HEIGHT+TILE_SIZE) {
       draw(map[i]);
     }
+  }
+}
+
+bool Game::collision(Object a, Object b) {
+  if((a.getDX() < (b.getDX()+b.getDW())) && ((a.getDX() + a.getDW()) > b.getDX()) 
+  && (a.getDY() < (b.getDY() + b.getDH())) && ((a.getDY() + a.getDH()) > b.getDY())) {
+    return true;
+  } else {
+    return false;
   }
 }
